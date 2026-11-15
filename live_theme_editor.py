@@ -621,6 +621,16 @@ class App:
         self.redraw_preview()
 
     # ---------- 配色方案（整体调色 / 随机配色） ----------
+    @staticmethod
+    def _hex_from_hsv(h, s, v, a):
+        rr, gg, bb = colorsys.hsv_to_rgb(h % 1.0, max(0.0, min(1.0, s)),
+                                        max(0.0, min(1.0, v)))
+        out = "#%02x%02x%02x" % (int(round(rr * 255)), int(round(gg * 255)),
+                                 int(round(bb * 255)))
+        if a < 255:
+            out += "%02x" % a
+        return out
+
     def _recolor(self, token, hue_deg, sat_scale, light_scale):
         """返回该色值变换后的颜色；灰色（饱和度极低）或解析失败返回 None。"""
         col = parse_color(token.value)
@@ -630,14 +640,17 @@ class App:
         h, s, v = colorsys.rgb_to_hsv(r / 255.0, g / 255.0, b / 255.0)
         if s < 0.06:
             return None
-        h2 = (h + hue_deg / 360.0) % 1.0
-        s2 = max(0.0, min(1.0, s * sat_scale))
-        v2 = max(0.0, min(1.0, v * light_scale))
-        rr, gg, bb = colorsys.hsv_to_rgb(h2, s2, v2)
-        new = "#%02x%02x%02x" % (int(round(rr * 255)), int(round(gg * 255)),
-                                 int(round(bb * 255)))
-        if a < 255:
-            new += "%02x" % a
+        new = self._hex_from_hsv(h + hue_deg / 360.0, s * sat_scale, v * light_scale, a)
+        return None if new == token.value else new
+
+    def _recolor_any(self, token):
+        """完全重掷：色相/饱和度/明度全部随机，灰色也一起随机。"""
+        col = parse_color(token.value)
+        if not col:
+            return None
+        a = col[3]
+        new = self._hex_from_hsv(random.random(), random.uniform(0.18, 0.95),
+                                 random.uniform(0.14, 0.92), a)
         return None if new == token.value else new
 
     def _apply_bulk(self, plan, note):
@@ -669,17 +682,33 @@ class App:
                 plan.append((token, col))
         return self._apply_bulk(plan, "已整体调色")
 
-    def randomize(self, wild=False):
+    def randomize(self, mode="coherent"):
         """随机配色。
 
-        整体随机：全主题统一一个随机色相 + 随机饱和/亮度系数，明暗层次保留；
-        逐色随机：每个色值各自一个随机色相，最花但亮度骨架仍在。
-        灰色始终跳过，两种模式都算一步撤销。
+        coherent 整体随机：全主题统一一个随机色相 + 随机饱和/亮度系数，明暗层次保留；
+        per 逐色随机：每个彩色值各自一个随机色相，亮度骨架仍在；
+        all 全部随机：每个色值的色相/饱和/明度全部重掷，灰色也一起随机（最疯）。
+        三种都算一步撤销。
         """
         if not self.doc:
             return 0
+        if mode is True:
+            mode = "per"
+        elif mode is False:
+            mode = "coherent"
+
         plan = []
-        if wild:
+        if mode == "all":
+            for item in self._rows:
+                token = item[0]
+                if token is None:
+                    continue
+                col = self._recolor_any(token)
+                if col:
+                    plan.append((token, col))
+            return self._apply_bulk(plan, "全部随机（连灰色一起，文字/背景都会变）")
+
+        if mode == "per":
             for item in self._rows:
                 token = item[0]
                 if token is None:
@@ -689,7 +718,8 @@ class App:
                                     random.uniform(0.96, 1.04))
                 if col:
                     plan.append((token, col))
-            return self._apply_bulk(plan, "逐色随机")
+            return self._apply_bulk(plan, "逐色随机（灰色已跳过）")
+
         hue = random.uniform(-180, 180)
         sat = random.uniform(0.95, 1.45)
         light = random.uniform(0.92, 1.08)
@@ -716,24 +746,29 @@ class App:
         tk.Label(dlg, text="随机配色", bg=UI_PANEL, fg=UI_ACCENT,
                  font=("Microsoft YaHei UI", 12, "bold")).pack(anchor="w", padx=16, pady=(14, 4))
         tk.Label(dlg, text="整体随机：全主题统一转一个随机色相，明暗层次和灰色骨架保持（推荐）\n"
-                           "逐色随机：每个色值各拿一个随机色相，最花，适合找灵感\n"
-                           "两种都跳过灰色、各算一步撤销，可以连点换到满意为止",
+                           "逐色随机：每个彩色值各拿一个随机色相，灰色不动，亮度骨架还在\n"
+                           "全部随机：色相/饱和/明度全部重掷，连文字和背景也一起随机，最疯\n"
+                           "三种都算一步撤销，可以连点换到满意为止",
                  bg=UI_PANEL, fg=UI_SUB, font=("Microsoft YaHei UI", 9),
-                 wraplength=420, justify="left").pack(anchor="w", padx=16, pady=(0, 12))
+                 wraplength=470, justify="left").pack(anchor="w", padx=16, pady=(0, 12))
 
         btns = tk.Frame(dlg, bg=UI_PANEL)
         btns.pack(fill="x", padx=16, pady=(0, 14))
         tk.Button(btns, text="整体随机", bg=UI_ACCENT, fg="#101010", relief="flat", bd=0,
                   activebackground="#ffc377", font=("Microsoft YaHei UI", 9, "bold"),
-                  padx=16, pady=7, cursor="hand2",
-                  command=lambda: self.randomize(False)).pack(side="left", padx=(0, 6))
+                  padx=14, pady=7, cursor="hand2",
+                  command=lambda: self.randomize("coherent")).pack(side="left", padx=(0, 6))
         tk.Button(btns, text="逐色随机", bg=UI_PANEL2, fg=UI_FG, relief="flat", bd=0,
                   activebackground="#343434", font=("Microsoft YaHei UI", 9),
-                  padx=16, pady=7, cursor="hand2",
-                  command=lambda: self.randomize(True)).pack(side="left", padx=(0, 6))
-        tk.Button(btns, text="关闭", bg=UI_PANEL2, fg=UI_FG, relief="flat", bd=0,
+                  padx=14, pady=7, cursor="hand2",
+                  command=lambda: self.randomize("per")).pack(side="left", padx=(0, 6))
+        tk.Button(btns, text="全部随机", bg=UI_PANEL2, fg=UI_FG, relief="flat", bd=0,
                   activebackground="#343434", font=("Microsoft YaHei UI", 9),
-                  padx=12, pady=7, cursor="hand2",
+                  padx=14, pady=7, cursor="hand2",
+                  command=lambda: self.randomize("all")).pack(side="left", padx=(0, 6))
+        tk.Button(btns, text="关闭", bg=UI_PANEL2, fg=UI_SUB, relief="flat", bd=0,
+                  activebackground="#343434", font=("Microsoft YaHei UI", 9),
+                  padx=10, pady=7, cursor="hand2",
                   command=dlg.destroy).pack(side="right")
 
         dlg.bind("<Escape>", lambda _e: dlg.destroy())
