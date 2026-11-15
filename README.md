@@ -12,6 +12,14 @@ A GUI editor for Ableton Live 12 theme files (`.ask`) — pick colors, preview t
 
 ![preview](assets/preview.png)
 
+改前 / 改后 —— 同一份 `.ask`，一次整体调色（预设「酒红」）：
+
+![before-after](assets/before-after.png)
+
+六个预设的效果（冷蓝 → 森绿 → 酒红 → 紫罗兰 → 落日橙 → 灰调），只动彩色、灰色保持不动：
+
+![scheme demo](assets/scheme-demo.gif)
+
 ## 为什么需要它
 
 Live 12 的主题是 `Resources/Themes/*.ask`，本质是一个纯 XML 颜色表：276 个色值条目、5 组嵌套的电平表配色。改一个颜色要翻几百行 XML，改完还得重启 Live 才能看效果。
@@ -59,6 +67,18 @@ python live_theme_editor.py --themes-dir "D:\Ableton\Resources\Themes"
 4. 按 **安装到主题目录**（或把 `.ask` 手动拷进 `Resources\Themes`）
 5. 关掉 Live 再打开 → 设置 → Look and Feel → Theme 下拉里就有了
 
+## 附带示例主题
+
+`examples/` 里有三个做好的 `.ask`，拷进 `Resources\Themes` 就能在 Live 里直接选：
+
+| 文件 | 基于 | 效果 |
+| --- | --- | --- |
+| `Wine Dark.ask` | Default Dark Neutral Medium | 酒红调，暗色面板 |
+| `Forest Light.ask` | Default Light Neutral Medium | 森绿调，亮色面板 |
+| `Mono Grey.ask` | Default Dark Neutral Medium | 近灰阶，只剩层次感 |
+
+想批量重做或改参数：`python tools/make_examples.py <Themes 目录> <输出目录>`，用的是和界面里「配色方案…」预设完全一致的算法（每个主题只改约 105 个彩色色值，灰色保留）。
+
 ## 快捷键
 
 | 键 | 作用 |
@@ -86,12 +106,16 @@ LiveThemeEditor/
 ├─ token_labels.py          234 个色值的中文名对照表
 ├─ README.en.md             英文说明
 ├─ 启动编辑器.cmd            源码运行用的双击启动器
+├─ examples/                三个现成的示例主题（酒红 / 森绿 / 灰调）
 ├─ assets/
 │  ├─ icon.ico / icon.png   应用图标
 │  ├─ preview.png           界面截图
+│  ├─ before-after.png      改前改后对比
+│  ├─ scheme-demo.gif       六个配色预设的轮播
 │  └─ social-preview.png    GitHub 社交预览图
 ├─ tools/
 │  ├─ make_icon.py          图标生成
+│  ├─ make_examples.py      从 Live 自带主题批量生成示例配色
 │  ├─ version_info.txt      exe 版本信息
 │  └─ build.ps1             一键打包
 └─ README.md

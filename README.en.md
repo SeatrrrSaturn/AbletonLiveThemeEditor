@@ -6,6 +6,14 @@ A GUI editor for **Ableton Live 12** theme files (`.ask`) — pick colors, previ
 
 ![preview](assets/preview.png)
 
+Before / after — the same `.ask`, one bulk color-scheme pass (preset "Wine Red"):
+
+![before-after](assets/before-after.png)
+
+The six built-in presets (cool blue → forest green → wine red → violet → sunset orange → mono grey); only colored tokens move, neutrals stay put:
+
+![scheme demo](assets/scheme-demo.gif)
+
 ## Why
 
 Live 12 themes live in `Resources/Themes/*.ask`. Each file is a plain XML color table: 276 color entries, including five nested VU-meter palettes. Tweaking one color means scrolling hundreds of lines, editing hex by hand, then restarting Live to see whether it looks right.
@@ -52,6 +60,18 @@ Standard library only.
 3. Rename the theme at the top, click **Save as…** (don't overwrite the bundled `Default *.ask`)
 4. Click **Install to themes folder**
 5. Restart Live → Settings → Look and Feel → Theme, and your theme is in the list
+
+## Bundled example themes
+
+`examples/` ships three ready-to-use `.ask` files — drop them into `Resources\Themes` and they show up in Live:
+
+| File | Based on | Look |
+| --- | --- | --- |
+| `Wine Dark.ask` | Default Dark Neutral Medium | wine red, dark panels |
+| `Forest Light.ask` | Default Light Neutral Medium | forest green, light panels |
+| `Mono Grey.ask` | Default Dark Neutral Medium | near-grayscale, hierarchy intact |
+
+Regenerate or tweak them with `python tools/make_examples.py <themes dir> <out dir>` — same algorithm as the in-app scheme presets (about 105 colored tokens per theme, neutrals untouched).
 
 ## Shortcuts
 
