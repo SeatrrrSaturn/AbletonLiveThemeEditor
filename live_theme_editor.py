@@ -896,8 +896,8 @@ class App:
             return
         self.refresh_themes()
         messagebox.showinfo("已安装",
-                            "已写入：\n%s\n\n关掉 Live 再重新打开，在 设置 → Look and Feel → Theme 里就能选到它。"
-                            % target)
+                            "已写入：\n%s\n\n不用重启 Live——重新打开一次 设置（Ctrl+,）→ Look and Feel → Color & Theme，"
+                            "主题下拉里就能选到它。" % target)
         self.status.config(text="已安装 %s" % name)
 
     # ---------- 右：实时预览 ----------

@@ -22,7 +22,7 @@ A GUI editor for Ableton Live 12 theme files (`.ask`) — pick colors, preview t
 
 ## 为什么需要它
 
-Live 12 的主题是 `Resources/Themes/*.ask`，本质是一个纯 XML 颜色表：276 个色值条目、5 组嵌套的电平表配色。改一个颜色要翻几百行 XML，改完还得重启 Live 才能看效果。
+Live 12 的主题是 `Resources/Themes/*.ask`，本质是一个纯 XML 颜色表：276 个色值条目、5 组嵌套的电平表配色。改一个颜色要翻几百行 XML，改完还得靠猜才知道是什么样。
 
 这个工具把整张颜色表变成可搜索的列表 + 实时预览，点什么改什么。
 
@@ -66,7 +66,7 @@ python live_theme_editor.py --themes-dir "D:\Ableton\Resources\Themes"
 2. 改颜色，或用 **配色方案…** 整体调色
 3. 顶部改「主题名称」，按 **另存为…** 存成新文件（别直接覆盖 `Default *.ask`）
 4. 按 **安装到主题目录**（或把 `.ask` 手动拷进 `Resources\Themes`）
-5. 关掉 Live 再打开 → 设置 → Look and Feel → Theme 下拉里就有了
+5. 重新打开一次 Live 的设置（`Ctrl+,`）→ Look and Feel → Color & Theme 的主题下拉里就有了，不用重启 Live
 
 ## 附带示例主题
 

@@ -16,7 +16,7 @@ The six built-in presets (cool blue → forest green → wine red → violet →
 
 ## Why
 
-Live 12 themes live in `Resources/Themes/*.ask`. Each file is a plain XML color table: 276 color entries, including five nested VU-meter palettes. Tweaking one color means scrolling hundreds of lines, editing hex by hand, then restarting Live to see whether it looks right.
+Live 12 themes live in `Resources/Themes/*.ask`. Each file is a plain XML color table: 276 color entries, including five nested VU-meter palettes. Tweaking one color means scrolling hundreds of lines, editing hex by hand, then guessing whether it looks right.
 
 This tool turns the whole table into a searchable list with a live preview.
 
@@ -33,7 +33,7 @@ This tool turns the whole table into a searchable list with a live preview.
 
 ## Download
 
-Grab the `LiveThemeEditor-v1.2.0-win64.zip` from [Releases](../../releases) — it contains `LiveThemeEditor.exe`. No Python required.
+Grab the `LiveThemeEditor-v1.2.1-win64.zip` from [Releases](../../releases) — it contains `LiveThemeEditor.exe`. No Python required.
 
 On first launch it looks for the themes folder in this order:
 
@@ -60,7 +60,7 @@ Standard library only.
 2. Edit colors, or use **Color scheme…** for bulk adjustment
 3. Rename the theme at the top, click **Save as…** (don't overwrite the bundled `Default *.ask`)
 4. Click **Install to themes folder**
-5. Restart Live → Settings → Look and Feel → Theme, and your theme is in the list
+5. Reopen Settings (`Ctrl+,`) → Look and Feel → Color & Theme — no restart needed, your theme is already in the list
 
 ## Bundled example themes
 
