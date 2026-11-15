@@ -1,7 +1,14 @@
-# LiveThemeEditor
+# AbletonLiveThemeEditor
 
 一个专门用来定制 **Ableton Live 12** 配色（`.ask` 主题文件）的图形化编辑器。
 A GUI editor for Ableton Live 12 theme files (`.ask`) — pick colors, preview them Live-style, ship a theme.
+
+[English](README.en.md)
+
+![GitHub release](https://img.shields.io/github/v/release/SeatrrrSaturn/AbletonLiveThemeEditor)
+![Downloads](https://img.shields.io/github/downloads/SeatrrrSaturn/AbletonLiveThemeEditor/total)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Platform](https://img.shields.io/badge/platform-Windows%2010%20%2F%2011-0078d4)
 
 ![preview](assets/preview.png)
 
@@ -77,10 +84,12 @@ python -m PyInstaller --noconfirm --onefile --windowed --name LiveThemeEditor ^
 LiveThemeEditor/
 ├─ live_theme_editor.py     主程序（单文件，Tkinter，无第三方依赖）
 ├─ token_labels.py          234 个色值的中文名对照表
+├─ README.en.md             英文说明
 ├─ 启动编辑器.cmd            源码运行用的双击启动器
 ├─ assets/
 │  ├─ icon.ico / icon.png   应用图标
-│  └─ preview.png           界面截图
+│  ├─ preview.png           界面截图
+│  └─ social-preview.png    GitHub 社交预览图
 ├─ tools/
 │  ├─ make_icon.py          图标生成
 │  ├─ version_info.txt      exe 版本信息
