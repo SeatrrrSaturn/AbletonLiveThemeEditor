@@ -1,9 +1,17 @@
-## LiveThemeEditor v1.0.0
+## LiveThemeEditor v1.1.0
 
 Ableton Live 12 主题配色编辑器 —— 图形界面改 `.ask` 主题，右侧仿 Live 实时预览。
 
+### 本版新增
+- **随机配色**：一键换一套。
+  - *整体随机* —— 全主题统一一个随机色相 + 随机饱和/亮度系数，明暗层次和灰色骨架保留，改完基本能直接看。
+  - *逐色随机* —— 每个色值各拿一个随机色相，最花，适合找灵感。
+  - 两种都跳过灰色（背景/文字/层级不变），各算一步撤销，可以连点到满意为止。
+- 附带三个示例主题：`examples/Wine Dark.ask`、`Forest Light.ask`、`Mono Grey.ask`
+- README 增加改前/改后对比图与六个预设的轮播 GIF
+
 ### 下载
-- `LiveThemeEditor-v1.0.0-win64.zip` — 解压即用，不需要装 Python（Windows 10/11 64 位）
+- `LiveThemeEditor-v1.1.0-win64.zip` — 解压即用，不需要装 Python（Windows 10/11 64 位）；压缩包内含 exe、README、LICENSE 和三个示例主题
 
 ### 功能
 - 276 个色值按语义分组，中英双语名，中英文都能搜
@@ -18,4 +26,5 @@ Ableton Live 12 主题配色编辑器 —— 图形界面改 `.ask` 主题，右
 - 建议先「另存为」自定义名字再安装，别直接覆盖 Live 自带的 `Default *.ask`
 
 ### 校验
-`SHA256: 6115ab0505a58e95e8dfdf13da86a9067caeb34eb67bafdae2a2ecd00e4aaea0`
+`SHA256(zip): 23146a262150ce5cbe6251ce342c5272a08603cd7f771e260402c3c4bfc56010`
+`SHA256(exe): 73a42473c8ee39aa62c5f233c4d79597be9fdefefedb2dd807672b28ee7331d9`

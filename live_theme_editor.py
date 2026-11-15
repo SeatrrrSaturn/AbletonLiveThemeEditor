@@ -22,6 +22,7 @@ import os
 import re
 import sys
 import math
+import random
 import colorsys
 import tkinter as tk
 from tkinter import ttk, filedialog, colorchooser, messagebox
@@ -325,6 +326,7 @@ class App:
         btn("安装到主题目录", self.install_theme, accent=True)
         btn("另存为…", self.save_as)
         btn("配色方案…", self.scheme_dialog)
+        btn("随机配色…", self.random_dialog)
         btn("撤销", self.undo)
         btn("全部还原", self.reset_all)
 
@@ -618,42 +620,125 @@ class App:
             self.status.config(text="已撤销 %s → %s" % (bilingual(token.name, token.section), old))
         self.redraw_preview()
 
-    # ---------- 配色方案（整体调色） ----------
+    # ---------- 配色方案（整体调色 / 随机配色） ----------
+    def _recolor(self, token, hue_deg, sat_scale, light_scale):
+        """返回该色值变换后的颜色；灰色（饱和度极低）或解析失败返回 None。"""
+        col = parse_color(token.value)
+        if not col:
+            return None
+        r, g, b, a = col
+        h, s, v = colorsys.rgb_to_hsv(r / 255.0, g / 255.0, b / 255.0)
+        if s < 0.06:
+            return None
+        h2 = (h + hue_deg / 360.0) % 1.0
+        s2 = max(0.0, min(1.0, s * sat_scale))
+        v2 = max(0.0, min(1.0, v * light_scale))
+        rr, gg, bb = colorsys.hsv_to_rgb(h2, s2, v2)
+        new = "#%02x%02x%02x" % (int(round(rr * 255)), int(round(gg * 255)),
+                                 int(round(bb * 255)))
+        if a < 255:
+            new += "%02x" % a
+        return None if new == token.value else new
+
+    def _apply_bulk(self, plan, note):
+        """plan: [(token, 新颜色)] 整批算一步撤销。"""
+        bulk = []
+        for token, new in plan:
+            bulk.append((token, token.value))
+            token.value = new
+            self._refresh_row(token)
+        if not bulk:
+            self.status.config(text="当前主题没有可调的彩色，或参数无变化")
+            return 0
+        self.undo_stack.append(("bulk", bulk))
+        self.redraw_preview()
+        self.status.config(text="%s：改了 %d 个色值（Ctrl+Z 可撤销）" % (note, len(bulk)))
+        return len(bulk)
+
     def apply_scheme(self, hue_deg, sat_scale, light_scale):
         """整主题调色：彩色整体转色相/加饱和/调亮暗，灰色保持原样。"""
         if not self.doc:
             return 0
-        bulk = []
+        plan = []
         for item in self._rows:
             token = item[0]
             if token is None:
                 continue
-            col = parse_color(token.value)
-            if not col:
+            col = self._recolor(token, hue_deg, sat_scale, light_scale)
+            if col:
+                plan.append((token, col))
+        return self._apply_bulk(plan, "已整体调色")
+
+    def randomize(self, wild=False):
+        """随机配色。
+
+        整体随机：全主题统一一个随机色相 + 随机饱和/亮度系数，明暗层次保留；
+        逐色随机：每个色值各自一个随机色相，最花但亮度骨架仍在。
+        灰色始终跳过，两种模式都算一步撤销。
+        """
+        if not self.doc:
+            return 0
+        plan = []
+        if wild:
+            for item in self._rows:
+                token = item[0]
+                if token is None:
+                    continue
+                col = self._recolor(token, random.uniform(-180, 180),
+                                    random.uniform(0.85, 1.55),
+                                    random.uniform(0.96, 1.04))
+                if col:
+                    plan.append((token, col))
+            return self._apply_bulk(plan, "逐色随机")
+        hue = random.uniform(-180, 180)
+        sat = random.uniform(0.95, 1.45)
+        light = random.uniform(0.92, 1.08)
+        for item in self._rows:
+            token = item[0]
+            if token is None:
                 continue
-            r, g, b, a = col
-            h, s, v = colorsys.rgb_to_hsv(r / 255.0, g / 255.0, b / 255.0)
-            if s < 0.06:
-                continue
-            h2 = (h + hue_deg / 360.0) % 1.0
-            s2 = max(0.0, min(1.0, s * sat_scale))
-            v2 = max(0.0, min(1.0, v * light_scale))
-            rr, gg, bb = colorsys.hsv_to_rgb(h2, s2, v2)
-            new = "#%02x%02x%02x" % (int(round(rr * 255)), int(round(gg * 255)),
-                                     int(round(bb * 255)))
-            if a < 255:
-                new += "%02x" % a
-            if new != token.value:
-                bulk.append((token, token.value))
-                token.value = new
-                self._refresh_row(token)
-        if bulk:
-            self.undo_stack.append(("bulk", bulk))
-            self.redraw_preview()
-            self.status.config(text="已整体调色 %d 个色值（Ctrl+Z 可撤销）" % len(bulk))
-        else:
-            self.status.config(text="当前主题没有可调的彩色，或参数无变化")
-        return len(bulk)
+            col = self._recolor(token, hue, sat, light)
+            if col:
+                plan.append((token, col))
+        return self._apply_bulk(
+            plan, "整体随机（色相 %+.0f°、饱和 ×%.2f、亮度 ×%.2f）" % (hue, sat, light))
+
+    def random_dialog(self):
+        if not self.doc:
+            messagebox.showinfo("先载入主题", "请先在左侧选一个 .ask 主题。")
+            return
+        dlg = tk.Toplevel(self.root)
+        dlg.title("随机配色")
+        dlg.configure(bg=UI_PANEL)
+        dlg.transient(self.root)
+        dlg.resizable(False, False)
+
+        tk.Label(dlg, text="随机配色", bg=UI_PANEL, fg=UI_ACCENT,
+                 font=("Microsoft YaHei UI", 12, "bold")).pack(anchor="w", padx=16, pady=(14, 4))
+        tk.Label(dlg, text="整体随机：全主题统一转一个随机色相，明暗层次和灰色骨架保持（推荐）\n"
+                           "逐色随机：每个色值各拿一个随机色相，最花，适合找灵感\n"
+                           "两种都跳过灰色、各算一步撤销，可以连点换到满意为止",
+                 bg=UI_PANEL, fg=UI_SUB, font=("Microsoft YaHei UI", 9),
+                 wraplength=420, justify="left").pack(anchor="w", padx=16, pady=(0, 12))
+
+        btns = tk.Frame(dlg, bg=UI_PANEL)
+        btns.pack(fill="x", padx=16, pady=(0, 14))
+        tk.Button(btns, text="整体随机", bg=UI_ACCENT, fg="#101010", relief="flat", bd=0,
+                  activebackground="#ffc377", font=("Microsoft YaHei UI", 9, "bold"),
+                  padx=16, pady=7, cursor="hand2",
+                  command=lambda: self.randomize(False)).pack(side="left", padx=(0, 6))
+        tk.Button(btns, text="逐色随机", bg=UI_PANEL2, fg=UI_FG, relief="flat", bd=0,
+                  activebackground="#343434", font=("Microsoft YaHei UI", 9),
+                  padx=16, pady=7, cursor="hand2",
+                  command=lambda: self.randomize(True)).pack(side="left", padx=(0, 6))
+        tk.Button(btns, text="关闭", bg=UI_PANEL2, fg=UI_FG, relief="flat", bd=0,
+                  activebackground="#343434", font=("Microsoft YaHei UI", 9),
+                  padx=12, pady=7, cursor="hand2",
+                  command=dlg.destroy).pack(side="right")
+
+        dlg.bind("<Escape>", lambda _e: dlg.destroy())
+        dlg.update_idletasks()
+        dlg.geometry("%dx%d" % (dlg.winfo_reqwidth(), dlg.winfo_reqheight()))
 
     def scheme_dialog(self):
         if not self.doc:

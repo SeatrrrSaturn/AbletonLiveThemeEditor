@@ -26,13 +26,14 @@ This tool turns the whole table into a searchable list with a live preview.
 - **Bilingual token names** — 234 tokens have Chinese labels; search matches both Chinese and English
 - **Three ways to change a color** — system color picker, direct hex input (`#RRGGBB` / `#RRGGBBAA`), or per-row reset
 - **Color schemes** — shift hue (−180…+180), saturation (0.3…1.8) and lightness (0.7…1.3) across the whole theme, plus six presets (cool blue, forest green, wine red, violet, sunset orange, grayscale). Neutral grays are left untouched so the panel hierarchy survives
+- **Randomizer** — one click for either a coherent random pass (single random hue across the whole theme, so brightness structure survives) or per-token chaos (each color its own hue); neutrals skipped, one undo step each, keep clicking until it looks right
 - **Multi-step undo**, undo for bulk scheme changes included, plus full reset
 - **Safe saving** — only the `Value="…"` on the matching line is replaced; indentation, line count and XML structure stay byte-identical. Change N colors, get N changed lines
 - **One-click install** into the Live themes folder
 
 ## Download
 
-Grab the `LiveThemeEditor-v1.0.0-win64.zip` from [Releases](../../releases) — it contains `LiveThemeEditor.exe`. No Python required.
+Grab the `LiveThemeEditor-v1.1.0-win64.zip` from [Releases](../../releases) — it contains `LiveThemeEditor.exe`. No Python required.
 
 On first launch it looks for the themes folder in this order:
 
